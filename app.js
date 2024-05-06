@@ -8,6 +8,12 @@ const app = express();
 
 app.use(morgan('dev'));
 app.use(express.json());
+
+// We can serve the static files, like html with express's built in middleware
+// If we hit a URl, and there is no route for that, express will start to search in the public folder
+// (Currently we do not need it)
+app.use(express.static(`${__dirname}/public`));
+
 app.use((req, res, next) => {
   console.log('Hello from the middleware');
   next();
