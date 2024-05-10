@@ -6,7 +6,10 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
 app.use(express.json());
 
 // We can serve the static files, like html with express's built in middleware
