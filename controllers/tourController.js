@@ -23,6 +23,15 @@ const getAllTours = async (req, res) => {
       query.sort('-createdAt');
     }
 
+    // 3) Field limiting
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      // exclude __v from the response. It's just for mongoose
+      query = query.select('-__v');
+    }
+
     //   EXECUTE QUERY
     const tours = await query;
 
