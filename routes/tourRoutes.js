@@ -3,8 +3,10 @@ const tourController = require('../controllers/tourController');
 
 const router = express.Router();
 
-// We can "chain" multiple middlewares in a route fe.: before create, we check, if the
-// req. body contains name and price, if yes only then create the tour
+router
+  .route('/top-5-cheap')
+  .get(tourController.aliasTopTours, tourController.getAllTours);
+
 router
   .route('/')
   .get(tourController.getAllTours)
