@@ -75,8 +75,6 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
-// QUERY MIDDLEWARE: this: the current query
-// Basically we use 'find', but that wouldn't apply to findOne. Bc. of that, we should use RegEx, to make this apply to all queries, starts with 'find'.
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
 
@@ -86,7 +84,13 @@ tourSchema.pre(/^find/, function (next) {
 
 tourSchema.post(/^find/, function (documents, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`);
-  console.log(documents);
+  next();
+});
+
+// AGGREGATION MIDDLEWARE
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
   next();
 });
 
