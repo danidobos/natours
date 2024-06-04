@@ -55,6 +55,10 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -62,26 +66,27 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-// Virtual properties: derived properties, we can calculate them from existing properties --> no point of saving them into the DB
 tourSchema.virtual('durationWeeks').get(function () {
-  // We need regular function, bc. we can access the current document through 'this'
   return this.duration / 7;
 });
 
-// DOCUMENT MIDDLEWARE: runs before .save() and .create()
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
 
-tourSchema.pre('save', function (next) {
-  console.log('Will save document');
+// QUERY MIDDLEWARE: this: the current query
+// Basically we use 'find', but that wouldn't apply to findOne. Bc. of that, we should use RegEx, to make this apply to all queries, starts with 'find'.
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+
+  this.start = Date.now();
   next();
 });
 
-// POST MIDDLEWARE: in this case we have access to the document, recently created
-tourSchema.post('save', function (document, next) {
-  console.log(document);
+tourSchema.post(/^find/, function (documents, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds`);
+  console.log(documents);
   next();
 });
 
