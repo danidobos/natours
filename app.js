@@ -24,9 +24,26 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
 app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl} on this server!`,
+  //   res.status(404).json({
+  //     status: 'fail',
+  //     message: `Can't find ${req.originalUrl} on this server!`,
+  //   });
+
+  const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+  err.status = 'fail';
+  err.statusCode = 404;
+
+  next(err);
+});
+
+// Error handling middleware. It's callback has 4 arguments, with that, express recognizes it as the error handler, and call it as last middleware.
+app.use((error, req, res, next) => {
+  error.statusCode = error.statusCode || 500;
+  error.status = error.status || 'error';
+
+  res.status(error.statusCode).json({
+    status: error.status,
+    message: error.message,
   });
 });
 
