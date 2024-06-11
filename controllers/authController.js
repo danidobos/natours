@@ -16,6 +16,7 @@ const signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    role: req.body.role,
   });
 
   // The secret should be az least 32 characters
@@ -96,4 +97,18 @@ const protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-module.exports = { signup, login, protect };
+// In the middleware, we need access to the values we specify in the router, when we call the function. We cannot pass them into the middleware function, bc. it only accepts req, res, next. So we create another function, with the arguments (...roles --> we can have as many args as we want, and JS will turn it into an array). Inside this function we return the middleware function, and thanks to closure, this middleware function will have access to the roles array.
+const restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // req.user.role --> in the protect middleware, in the end we set req.user = currentUser. And the protect middleware will always run before restrictTo, so in this case now we have access to the currently logged in user's role.
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403)
+      );
+    }
+
+    next();
+  };
+};
+
+module.exports = { signup, login, protect, restrictTo };
