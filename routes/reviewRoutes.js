@@ -2,7 +2,6 @@ const express = require('express');
 const reviewController = require('./../controllers/reviewController');
 const authController = require('./../controllers/authController');
 
-// We need to set mergeParams to true in options, otherwise we won't have access to the tourId, coming from the URL.
 const router = express.Router({ mergeParams: true });
 
 router
@@ -11,9 +10,13 @@ router
   .post(
     authController.protect,
     authController.restrictTo('user'),
+    reviewController.setTourAndUserIds,
     reviewController.createReview
   );
 
-router.route('/:id').delete(reviewController.deleteReview);
+router
+  .route('/:id')
+  .patch(reviewController.updateReview)
+  .delete(reviewController.deleteReview);
 
 module.exports = router;
