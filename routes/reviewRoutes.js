@@ -2,7 +2,8 @@ const express = require('express');
 const reviewController = require('./../controllers/reviewController');
 const authController = require('./../controllers/authController');
 
-const router = express.Router();
+// We need to set mergeParams to true in options, otherwise we won't have access to the tourId, coming from the URL.
+const router = express.Router({ mergeParams: true });
 
 router
   .route('/')
