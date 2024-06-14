@@ -114,12 +114,6 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-// We need to think about, witch fields will be queried the most, and set the indexes accordingly. We shouldn't set indexes blindly for every field.
-
-// Create index for specific fields. F.e. on price. 1 means ascending, -1 stands for descending order
-// tourSchema.index({ price: 1 });
-
-// We can create compound indexes, if we assume there will be queries for multiple fields. This kind of index will work for each one without the other
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
 
