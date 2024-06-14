@@ -33,6 +33,9 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// Sometimes it won't work immediately, the db sometimes needs even a day!
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
@@ -62,7 +65,6 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
       ratingsAverage: stats[0].avgRating,
     });
   } else {
-    // Set back to default if every review get deleted
     await Tour.findByIdAndUpdate(tourId, {
       ratingsQuantity: 0,
       ratingsAverage: 4.5,
@@ -70,22 +72,16 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
   }
 };
 
-// Post middleware doesn't have next
 reviewSchema.post('save', function () {
-  // this points to current review
   this.constructor.calcAverageRatings(this.tour);
 });
 
-// We need to recalculate the avg ratings and num ratings, whenever a review gets updated or deleted. It's harder then when a new one is created, bc. for this we use findByIdAndUpdate and findByIdAndDelete methods. In those cases, we don't have access to the document middleware, like before (when saving). Instead we can use the query middleware.
 reviewSchema.pre(/^findOneAnd/, async function (next) {
-  // this: the current query. We need to find the tour belongs to the review. For this we can use a trick: since we have access to the current query, we can just await it.
-  // We cannot use post in the middleware, because on that case the query was already executed, and we wouldn't have access to the tour
   this.r = await this.findOne();
   console.log(this.r);
   next();
 });
 
-// Workaround: after the query was executed, we can run the post middleware. But where do we get the tour id from? We can pass data from the pre middleware to the post middleware --> save this.r into the object in pre middleware, and we can retrieve it from post.
 reviewSchema.post(/^findOneAnd/, async function () {
   this.r.constructor.calcAverageRatings(this.r.tour);
 });
