@@ -21,6 +21,11 @@ router
     tourController.getMonthlyPlan
   );
 
+// We could use query string, but this way, it's more cleaner, and this is the standard let's say.
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin);
+
 router
   .route('/')
   .get(tourController.getAllTours)
